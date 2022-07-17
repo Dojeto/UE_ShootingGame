@@ -34,6 +34,7 @@ private:
 	UPROPERTY(VisibleAnyWhere,BluePrintReadOnly, Category = Camera,meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
+	
 public:
 
 	FORCEINLINE USpringArmComponent*GetCameraBoom() const { return CameraBoom; }
@@ -45,4 +46,16 @@ public:
 
 	//called or roght
 	void MoveRight (float value );
+
+	//LookRateRight
+	void LookRateRight (float Rate);
+
+	//LookRateUp
+	void LookRateUp (float Rate);
+
+	UPROPERTY(EditAnyWhere)
+	float BaseTurnRate {4.5f};
+
+	UPROPERTY(EditAnyWhere)
+	float BaseUpRate {4.5f};
 };

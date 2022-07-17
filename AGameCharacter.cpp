@@ -59,9 +59,16 @@ void AAGameCharacter::Tick(float DeltaTime)
 void AAGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward",this,&AAGameCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight",this,&AAGameCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("LookRateRight",this,&AAGameCharacter::LookRateRight);
+	PlayerInputComponent->BindAxis("LookRateUp",this,&AAGameCharacter::LookRateUp);
+	PlayerInputComponent->BindAxis("MouseUp",this,&APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("MouseTurn",this,&APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump",IE_Released,this,&ACharacter::StopJumping);
 }
 
 void AAGameCharacter :: MoveForward(float value)
@@ -80,10 +87,20 @@ void AAGameCharacter :: MoveForward(float value)
 	// 	AddMovementInput(Direction,value);
 	// }
 
-	AddMovementInput(GetActorForwardVector() * value);
+	AddMovementInput(GetActorForwardVector()* value);
 }
 
 void AAGameCharacter :: MoveRight(float value)
 {
 	AddMovementInput(GetActorRightVector()* value);
+}
+
+void AAGameCharacter:: LookRateRight(float Rate)
+{
+	AddControllerYawInput(Rate * BaseTurnRate *GetWorld()->DeltaTimeSeconds);
+}
+
+void AAGameCharacter:: LookRateUp(float Rate)
+{
+	AddControllerPitchInput(Rate * BaseUpRate *GetWorld()->DeltaTimeSeconds);
 }
