@@ -34,6 +34,23 @@ private:
 	UPROPERTY(VisibleAnyWhere,BluePrintReadOnly, Category = Camera,meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class USoundCue *FireSound;	
+
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem * MuzzeleFlash;
+	// Montage For Fire Weapon
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class UAnimMontage * HipFireMontage;
+
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class UAnimMontage * AmmoReaload;
+
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem * Impact;
+
+	UPROPERTY(EditAnyWhere,BluePrintReadWrite,Category = Combat , meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem * SmokeParticle;
 	
 public:
 
@@ -58,4 +75,11 @@ public:
 
 	UPROPERTY(EditAnyWhere)
 	float BaseUpRate {4.5f};
+	//called when fire button will pressed 
+	void FireWeapon ();
+	
+	void Reaload();
+
+	UPROPERTY(EditAnyWhere)
+	float Ammo {10};
 };
