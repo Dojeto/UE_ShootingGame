@@ -32,11 +32,11 @@ AAGameCharacter::AAGameCharacter()
 
 	//Don't Roatate your character only camera will rotate
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
+	bUseControllerRotationRoll = true;
 	bUseControllerRotationYaw = false;
 
 	//Character Movement
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f,54.0f,0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
 	GetCharacterMovement()->AirControl=0.2f;
@@ -146,6 +146,86 @@ void AAGameCharacter :: FireWeapon()
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),MuzzeleFlash,SocketTransform);
 		}
 
+		//get current size of view port
+		FVector2D ViewPortSize;
+
+		if(GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->GetViewportSize(ViewPortSize);
+		}
+	
+		//Get screen space location of crosshair
+		FVector2D CrossHairLocation(ViewPortSize.X/2,ViewPortSize.Y/2);
+
+		CrossHairLocation.Y = CrossHairLocation.Y-50.0f;
+
+		FVector CrossHairWorldPosition;
+		FVector CrossHairWorldDirection;
+
+		//get world potision and direction 
+		bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this,0),
+		CrossHairLocation,
+		CrossHairWorldPosition,
+		CrossHairWorldDirection);
+
+		if(bScreenToWorld)//was dprojection is successfull
+		{
+			FHitResult ScreenHit;
+			const FVector Start {CrossHairWorldPosition};
+			const FVector End {Start + CrossHairWorldDirection * 50000.0f};
+
+			//set beam end ponit
+
+			FVector BeamEndPoint { End };
+
+			//tace 
+			GetWorld()->LineTraceSingleByChannel(ScreenHit,Start,End,ECollisionChannel::ECC_Visibility);
+
+			//bloacking hit
+			if(ScreenHit.bBlockingHit)
+			{
+				//beampoint tace hit location
+				BeamEndPoint = ScreenHit.Location;
+				if(Impact)
+				{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),Impact,BeamEndPoint);
+				}
+
+				if (SmokeParticle)
+				{
+					UParticleSystemComponent * Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),SmokeParticle,SocketTransform);
+					if(Beam)
+					{
+						Beam->SetVectorParameter(FName("Target"),BeamEndPoint);
+					}
+				}
+			}
+
+			FHitResult BeamHitPoint;
+			GetWorld()->LineTraceSingleByChannel(BeamHitPoint,SocketTransform.GetLocation(),BeamEndPoint,ECollisionChannel::ECC_Visibility);
+
+			if(BeamHitPoint.bBlockingHit)
+			{
+				BeamEndPoint = BeamHitPoint.Location;
+
+				if(Impact)
+				{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),Impact,BeamEndPoint);
+				}
+
+				if (SmokeParticle)
+				{
+					UParticleSystemComponent * Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),SmokeParticle,SocketTransform);
+					if(Beam)
+					{
+						Beam->SetVectorParameter(FName("Target"),BeamEndPoint);
+					}
+				}
+
+			}
+		}
+
+		/* Use Full -- Bullet Traceing 
 		FHitResult FireHit;
 
 		const FVector Start{SocketTransform.GetLocation()};
@@ -182,8 +262,9 @@ void AAGameCharacter :: FireWeapon()
 				}
 			}
 		}
+		*/
 	}
-
+	
 	UAnimInstance * AnimeInstance = GetMesh()->GetAnimInstance();
 	if(AnimeInstance && HipFireMontage)
 	{
